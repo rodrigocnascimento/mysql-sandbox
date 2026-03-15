@@ -1,0 +1,34 @@
+services:
+  sakila:
+    image: mysql:8.0
+    container_name: sakila-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${SAKILA_MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${SAKILA_MYSQL_DATABASE}
+      MYSQL_USER: ${SAKILA_MYSQL_USER}
+      MYSQL_PASSWORD: ${SAKILA_MYSQL_PASSWORD}
+      TZ: ${TZ}
+    volumes:
+      - sakila_data:/var/lib/mysql
+      - ./sakila/init:/docker-entrypoint-initdb.d:ro
+      - ./sakila/config/custom.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    ports:
+      - "3306:3306"
+    networks:
+      - mysql-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${SAKILA_MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+networks:
+  mysql-network:
+    driver: bridge
+
+volumes:
+  sakila_data:
+    driver: local

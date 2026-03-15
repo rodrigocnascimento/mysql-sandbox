@@ -1,0 +1,11 @@
+[mysqld]
+performance_schema = ON
+performance-schema-instrument = %=ON
+performance-schema-consumer-events-statements-history = ON
+performance-schema-consumer-events-statements-history-long = ON
+performance-schema-consumer-events-statements-current = ON
+
+performance_schema_events_statements_history_size = 10000
+performance_schema_events_statements_history_long_size = 100000
+performance_schema_max_sql_text_length = 1024
+performance_schema_max_digest_length = 512
