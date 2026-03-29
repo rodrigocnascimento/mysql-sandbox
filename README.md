@@ -207,6 +207,68 @@ The Performance Schema is configured with specific settings to enable detailed q
 
 This configuration allows tools like sql-sage to collect and analyze query performance data effectively.
 
+### About the RH Test DB Size
+
+The RH Test DB (Employees database) is intentionally large (~300,000 employees, ~2.8 million salary records) to provide a realistic environment for performance testing. With this volume of data:
+
+- Query performance issues become more pronounced and easier to detect
+- Index usage (or lack thereof) has a significant impact on execution time
+- Tools like sql-sage can demonstrate their value in identifying slow queries
+- Development practices can be tested against production-like data volumes
+
+This makes it ideal for training and experimentation with SQL analysis tools.
+
+### Using with sql-sage and rh-test-api
+
+This database is designed to work seamlessly with the [sql-sage](https://github.com/rodrigocnascimento/sql-sage) tool and [rh-test-api](https://github.com/rodrigocnascimento/rh-test-api) project for comprehensive SQL query analysis training:
+
+1. **Start the database**: `make up DB=rh-testdb`
+2. **Run the test API**: Clone and run rh-test-api separately (see below)
+3. **Use sql-sage**: Scan the API code, collect queries from Performance Schema, and analyze results
+
+#### Complete Workflow Example:
+
+```bash
+# Terminal 1: Start the database
+cd mysql-sandbox
+make up DB=rh-testdb
+
+# Terminal 2: Start the test API (in separate directory)
+git clone https://github.com/rodrigocnascimento/rh-test-api.git
+cd rh-test-api
+cp .env.example .env
+npm install
+npm run dev
+
+# Terminal 3: Run sql-sage analysis
+# Scan for potential issues in the API code
+sql-sage scan ./rh-test-api/src --output scanned.jsonl
+
+# Make some requests to generate queries
+curl http://localhost:3000/api/employees-with-salaries
+curl "http://localhost:3000/api/employees/search?name=john"
+
+# Collect actual queries from the database
+sql-sage collect --source perf-schema \
+  --host localhost \
+  --port 3307 \
+  --user employees_user \
+  --password employees_password \
+  --database employees \
+  --min-time 100 \
+  --output collected.jsonl
+
+# Consolidate and analyze
+sql-sage consolidate --input scanned.jsonl collected.jsonl --output consolidated.jsonl
+sql-sage analyze consolidated.jsonl --model models/
+```
+
+This setup provides hands-on experience with:
+- Identifying performance issues in code (static analysis)
+- Capturing actual query performance (dynamic analysis)
+- Comparing predicted vs actual problems
+- Learning optimization techniques
+
 ---
 
 ## Performance Schema
