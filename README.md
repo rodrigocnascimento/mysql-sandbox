@@ -94,15 +94,15 @@ mysql -h localhost -P 3306 -u sakila_user -p sakila
 mysql -h localhost -P 3307 -u employees_user -p employees
 ```
 
-### Example Usage with RH Test API
+### Example Usage with External Test API
 
-You can use the RH Test DB with the [rh-test-api](https://github.com/rodrigocnascimento/rh-test-api) project to test SQL query analysis tools like sql-sage. This API is intentionally designed with many performance errors and anti-patterns for experimental purposes:
+The RH Test DB in this repository can be used with external projects like the [rh-test-api](https://github.com/rodrigocnascimento/rh-test-api) to test SQL query analysis tools like sql-sage. That API is intentionally designed with many performance errors and anti-patterns for experimental purposes:
 
 ```bash
 # Start the RH Test DB from this repository
 make up DB=rh-testdb
 
-# Clone and set up the test API (in a separate directory)
+# In a separate terminal, clone and set up the test API (separate project)
 git clone https://github.com/rodrigocnascimento/rh-test-api.git
 cd rh-test-api
 cp .env.example .env
@@ -111,6 +111,8 @@ npm run dev
 ```
 
 The API will be available at http://localhost:3000 and provides various endpoints with intentional performance issues (N+1 queries, SELECT *, missing indexes, etc.) to test database analysis tools and understand query performance problems.
+
+**Note**: The rh-test-api is a separate project and is NOT included in this mysql-sandbox repository. It must be cloned separately to use with this database.
 
 ### Environment Variables
 
