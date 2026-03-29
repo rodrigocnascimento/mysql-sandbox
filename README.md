@@ -94,6 +94,50 @@ mysql -h localhost -P 3306 -u sakila_user -p sakila
 mysql -h localhost -P 3307 -u employees_user -p employees
 ```
 
+### Example Usage with RH Test API
+
+You can use the RH Test DB with the [rh-test-api](https://github.com/rodrigocnascimento/rh-test-api) project to test SQL query analysis tools like sql-sage. This API is intentionally designed with many performance errors and anti-patterns for experimental purposes:
+
+```bash
+# Start the RH Test DB from this repository
+make up DB=rh-testdb
+
+# Clone and set up the test API (in a separate directory)
+git clone https://github.com/rodrigocnascimento/rh-test-api.git
+cd rh-test-api
+cp .env.example .env
+npm install
+npm run dev
+```
+
+The API will be available at http://localhost:3000 and provides various endpoints with intentional performance issues (N+1 queries, SELECT *, missing indexes, etc.) to test database analysis tools and understand query performance problems.
+
+### Environment Variables
+
+Edite o arquivo `.env` para customize as configurações:
+
+```env
+# Sakila
+SAKILA_MYSQL_ROOT_PASSWORD=root_password
+SAKILA_MYSQL_DATABASE=sakila
+SAKILA_MYSQL_USER=sakila_user
+SAKILA_MYSQL_PASSWORD=sakila_password
+
+# RH Test DB
+RH_TESTDB_MYSQL_ROOT_PASSWORD=root_password
+RH_TESTDB_MYSQL_DATABASE=employees
+RH_TESTDB_MYSQL_USER=employees_user
+RH_TESTDB_MYSQL_PASSWORD=employees_password
+
+TZ=America/Sao_Paulo
+```
+
+### RH Test DB (port 3307)
+
+```bash
+mysql -h localhost -P 3307 -u employees_user -p employees
+```
+
 ### Environment Variables
 
 Edit the `.env` file to customize configurations:
@@ -147,7 +191,19 @@ mysql-sandbox/
 - **Isolated Networks**: Each database in its own configuration
 - **UTF8MB4 Charset**: Full support for special characters
 - **MySQL 8.0**: Latest stable MySQL version
-- **Performance Schema**: Configured and enabled by default
+- **Performance Schema**: Configured and enabled by default for query analysis
+
+### Why Performance Schema Configuration?
+
+The Performance Schema is configured with specific settings to enable detailed query analysis:
+
+- `performance_schema=ON`: Enables the Performance Schema
+- `performance-schema-instrument=%=ON`: Enables all statement instruments
+- `performance-schema-consumer-events-statements-history=ON`: Stores historical statement events
+- `performance-schema-consumer-events-statements-history-long=ON`: Stores long historical statement events
+- `performance-schema-consumer-events-statements-current=ON`: Stores current statement events
+
+This configuration allows tools like sql-sage to collect and analyze query performance data effectively.
 
 ---
 
