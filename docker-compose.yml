@@ -1,0 +1,79 @@
+services:
+  # MySQL Sandbox - RH Test Database
+  rh-testdb:
+    image: mysql:8.0
+    container_name: rh-testdb-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${RH_TESTDB_MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${RH_TESTDB_MYSQL_DATABASE}
+      MYSQL_USER: ${RH_TESTDB_MYSQL_USER}
+      MYSQL_PASSWORD: ${RH_TESTDB_MYSQL_PASSWORD}
+      TZ: ${TZ}
+    volumes:
+      - rh_testdb_data:/var/lib/mysql
+      - ./rh-testdb/init:/docker-entrypoint-initdb.d:ro
+      - ./rh-testdb/config/custom.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    ports:
+      - "3307:3306"
+    networks:
+      - mysql-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${RH_TESTDB_MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  # RH Test API - Test Application with Performance Issues
+  rh-test-api:
+    build:
+      context: ../rh-sakila-test-api
+      dockerfile: Dockerfile
+    container_name: rh-test-api
+    restart: unless-stopped
+    environment:
+      DB_HOST: rh-testdb
+      DB_PORT: 3306
+      DB_USER: ${RH_TESTDB_MYSQL_USER}
+      DB_PASSWORD: ${RH_TESTDB_MYSQL_PASSWORD}
+      DB_NAME: ${RH_TESTDB_MYSQL_DATABASE}
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      rh-testdb:
+        condition: service_healthy
+    networks:
+      - mysql-network
+
+  # SQL Sage - Query Analysis Tool
+  sql-sage:
+    image: node:18
+    container_name: sql-sage
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ../sql-sage:/app
+    command: >
+      sh -c "
+      npm install &&
+      npm run build &&
+      tail -f /dev/null
+      "
+    ports:
+      - "4000:4000"
+    depends_on:
+      - rh-testdb
+      - rh-test-api
+    networks:
+      - mysql-network
+
+networks:
+  mysql-network:
+    driver: bridge
+
+volumes:
+  rh_testdb_data:
+    driver: local

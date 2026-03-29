@@ -218,15 +218,73 @@ The RH Test DB (Employees database) is intentionally large (~300,000 employees, 
 
 This makes it ideal for training and experimentation with SQL analysis tools.
 
-### Using with sql-sage and rh-test-api
+### Using with sql-sage and rh-sakila-test-api
 
-This database is designed to work seamlessly with the [sql-sage](https://github.com/rodrigocnascimento/sql-sage) tool and [rh-test-api](https://github.com/rodrigocnascimento/rh-test-api) project for comprehensive SQL query analysis training:
+This database is designed to work seamlessly with the [sql-sage](https://github.com/rodrigocnascimento/sql-sage) tool and [rh-sakila-test-api](https://github.com/rodrigocnascimento/rh-sakila-test-api) project for comprehensive SQL query analysis training:
 
+#### Option 1: Individual Services (Manual)
 1. **Start the database**: `make up DB=rh-testdb`
-2. **Run the test API**: Clone and run rh-test-api separately (see below)
+2. **Run the test API**: Clone and run rh-sakila-test-api separately
 3. **Use sql-sage**: Scan the API code, collect queries from Performance Schema, and analyze results
 
-#### Complete Workflow Example:
+#### Option 2: Docker Compose (Recommended)
+All services can be started together using Docker Compose:
+
+```bash
+# Start all services (database, API, and sql-sage)
+docker-compose up -d
+
+# Or start them individually
+docker-compose up -d rh-testdb     # Just the database
+docker-compose up -d rh-test-api   # Database and API
+docker-compose up -d sql-sage      # All services
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f rh-test-api
+docker-compose logs -f sql-sage
+
+# Stop all services
+docker-compose down
+```
+
+#### Complete Workflow Example with Docker Compose:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Wait for services to be healthy (check with docker-compose ps)
+
+# Run sql-sage analysis
+# Scan for potential issues in the API code
+sql-sage scan ./rh-sakila-test-api/src --output scanned.jsonl
+
+# Make some requests to generate queries (API is at http://localhost:3000)
+curl http://localhost:3000/api/employees-with-salaries
+curl "http://localhost:3000/api/employees/search?name=john"
+
+# Collect actual queries from the database
+sql-sage collect --source perf-schema \
+  --host rh-testdb \  # Use service name when running in same network
+  --port 3306 \       # Internal port in docker network
+  --user employees_user \
+  --password employees_password \
+  --database employees \
+  --min-time 100 \
+  --output collected.jsonl
+
+# Consolidate and analyze
+sql-sage consolidate --input scanned.jsonl collected.jsonl --output consolidated.jsonl
+sql-sage analyze consolidated.jsonl --model models/
+
+# When finished, clean up
+docker-compose down
+```
+
+#### Manual Workflow Example (Original Method):
 
 ```bash
 # Terminal 1: Start the database
@@ -234,15 +292,15 @@ cd mysql-sandbox
 make up DB=rh-testdb
 
 # Terminal 2: Start the test API (in separate directory)
-git clone https://github.com/rodrigocnascimento/rh-test-api.git
-cd rh-test-api
+git clone https://github.com/rodrigocnascimento/rh-sakila-test-api.git
+cd rh-sakila-test-api
 cp .env.example .env
 npm install
 npm run dev
 
 # Terminal 3: Run sql-sage analysis
 # Scan for potential issues in the API code
-sql-sage scan ./rh-test-api/src --output scanned.jsonl
+sql-sage scan ./rh-sakila-test-api/src --output scanned.jsonl
 
 # Make some requests to generate queries
 curl http://localhost:3000/api/employees-with-salaries
