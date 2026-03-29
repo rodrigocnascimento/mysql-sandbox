@@ -1,19 +1,19 @@
-# MySQL Sandbox - Bancos de Exemplo
+# MySQL Sandbox - Example Databases
 
-Configuração Docker com Docker Compose para bancos de dados Sakila e Employees (RH), com MySQL 8.0.
+Docker Compose configuration for Sakila and Employees (HR) example databases with MySQL 8.0.
 
-## Sobre Este Projeto
+## About This Project
 
-Este projeto facilita a configuração de dois bancos de dados exemplo populares para MySQL usando containers Docker. Ideal para testes, aprendizado e desenvolvimento.
+This project facilitates the setup of two popular MySQL example databases using Docker containers. Ideal for testing, learning, and development.
 
-### Bancos Disponíveis
+### Available Databases
 
-| Banco | Porta | Descrição |
-|-------|-------|-----------|
-| **Sakila** | 3306 | Banco de exemplo de locadora (films, actors, customers, rentals) |
-| **RH Test DB** | 3307 | Banco de Employees (funcionários, departamentos, salários) |
+| Database | Port | Description |
+|----------|------|-------------|
+| **Sakila** | 3306 | Sample database of a video rental store (films, actors, customers, rentals) |
+| **RH Test DB** | 3307 | Employees database (employees, departments, salaries) |
 
-### Origem dos Dados
+### Data Sources
 
 - **Sakila**: [LintangWisesa/Sakila_MySQL_Example](https://github.com/LintangWisesa/Sakila_MySQL_Example)
 - **Employees**: [datacharmer/test_db](http://github.com/datacharmer/test_db)
@@ -23,80 +23,80 @@ Este projeto facilita a configuração de dois bancos de dados exemplo populares
 ## Quick Start
 
 ```bash
-# Clone o repositório
+# Clone the repository
 git clone https://github.com/seu-usuario/mysql-sandbox.git
 cd mysql-sandbox
 
-# Iniciar um banco específico
+# Start a specific database
 make up DB=sakila
 make up DB=rh-testdb
 
-# Iniciar todos os bancos
+# Start all databases
 make up-all
 
-# Ver status
+# Check status
 make status
 ```
 
 ---
 
-## Pré-requisitos
+## Prerequisites
 
 - Docker
 - Docker Compose
-- Make (opcional, mas recomendado)
+- Make (optional, but recommended)
 
 ---
 
-## Comandos
+## Commands
 
-| Comando | Descrição |
-|---------|------------|
-| `make up DB=<banco>` | Inicia um banco específico |
-| `make up-all` | Inicia todos os bancos |
-| `make down DB=<banco>` | Para um banco específico |
-| `make down-all` | Para todos os bancos |
-| `make restart DB=<banco>` | Reinicia um banco |
-| `make logs DB=<banco>` | Mostra logs em tempo real |
-| `make status` | Mostra status dos containers |
-| `make clean` | Remove todos os containers e volumes |
-| `make clean-<banco>` | Remove um banco específico |
+| Command | Description |
+|---------|-------------|
+| `make up DB=<database>` | Starts a specific database |
+| `make up-all` | Starts all databases |
+| `make down DB=<database>` | Stops a specific database |
+| `make down-all` | Stops all databases |
+| `make restart DB=<database>` | Restarts a specific database |
+| `make logs DB=<database>` | Shows real-time logs |
+| `make status` | Shows container status |
+| `make clean` | Removes all containers and volumes |
+| `make clean-<database>` | Removes a specific database |
 
-### Exemplos
+### Examples
 
 ```bash
-# Iniciar Sakila
+# Start Sakila
 make up DB=sakila
 
-# Ver logs do RH TestDB
+# View RH TestDB logs
 make logs DB=rh-testdb
 
-# Parar apenas o Sakila
+# Stop only Sakila
 make down DB=sakila
 
-# Limpar apenas o RH TestDB
+# Clean only RH TestDB
 make clean-rh-testdb
 ```
 
 ---
 
-## Conexão
+## Connection
 
-### Sakila (porta 3306)
+### Sakila (port 3306)
 
 ```bash
 mysql -h localhost -P 3306 -u sakila_user -p sakila
 ```
 
-### RH Test DB (porta 3307)
+### RH Test DB (port 3307)
 
 ```bash
 mysql -h localhost -P 3307 -u employees_user -p employees
 ```
 
-### Variáveis de Ambiente
+### Environment Variables
 
-Edite o arquivo `.env` para customize as configurações:
+Edit the `.env` file to customize configurations:
 
 ```env
 # Sakila
@@ -116,48 +116,48 @@ TZ=America/Sao_Paulo
 
 ---
 
-## Estrutura do Projeto
+## Project Structure
 
 ```
 mysql-sandbox/
-├── .env                         # Variáveis de ambiente
+├── .env                         # Environment variables
 ├── .gitignore
-├── Makefile                     # Comandos de gerenciamento
-├── docker-compose.sakila.yml   # Compose para Sakila
-├── docker-compose.rh-testdb.yml # Compose para RH TestDB
+├── Makefile                     # Management commands
+├── docker-compose.sakila.yml   # Compose for Sakila
+├── docker-compose.rh-testdb.yml # Compose for RH TestDB
 ├── sakila/
 │   ├── config/
-│   │   └── custom.cnf          # Configurações MySQL (Performance Schema)
+│   │   └── custom.cnf          # MySQL configuration (Performance Schema)
 │   └── init/
-│       ├── sakila-schema.sql  # Schema do banco Sakila
-│       └── sakila-data.sql    # Dados do banco Sakila
+│       ├── sakila-schema.sql  # Sakila database schema
+│       └── sakila-data.sql    # Sakila database data
 └── rh-testdb/
     ├── config/
-    │   └── custom.cnf          # Configurações MySQL (Performance Schema)
+    │   └── custom.cnf          # MySQL configuration (Performance Schema)
     └── init/
-        └── employees.sql      # Schema + dados do banco Employees
+        └── employees.sql      # Employees database schema + data
 ```
 
 ---
 
-## Características
+## Features
 
-- **Volumes persistentes**: Dados são mantidos entre reinicializações
-- **Health checks**: Verificação automática de disponibilidade
-- **Redes isoladas**: Cada banco em sua própria configuração
-- **Charset UTF8MB4**: Suporte completo a caracteres especiais
-- **MySQL 8.0**: Última versão estável do MySQL
-- **Performance Schema**: Configurado e ativado por padrão
+- **Persistent Volumes**: Data is maintained between restarts
+- **Health Checks**: Automatic availability verification
+- **Isolated Networks**: Each database in its own configuration
+- **UTF8MB4 Charset**: Full support for special characters
+- **MySQL 8.0**: Latest stable MySQL version
+- **Performance Schema**: Configured and enabled by default
 
 ---
 
 ## Performance Schema
 
-O projeto já vem com o [Performance Schema](https://dev.mysql.com/doc/refman/8.0/en/performance-schema.html) configurado automaticamente para análise de queries.
+The project comes with [Performance Schema](https://dev.mysql.com/doc/refman/8.0/en/performance-schema.html) automatically configured for query analysis.
 
-### Configuração Ativada
+### Enabled Configuration
 
-| Parâmetro | Valor |
+| Parameter | Value |
 |-----------|-------|
 | `performance_schema` | ON |
 | `performance-schema-instrument` | %=ON |
@@ -165,26 +165,26 @@ O projeto já vem com o [Performance Schema](https://dev.mysql.com/doc/refman/8.
 | `performance-schema-consumer-events-statements-history-long` | ON |
 | `performance-schema-consumer-events-statements-current` | ON |
 
-### Verificar Status
+### Check Status
 
 ```sql
--- Verificar se está ativo
+-- Check if it's active
 SHOW VARIABLES LIKE 'performance_schema';
 
--- Verificar consumers ativos
+-- Check active consumers
 SELECT * FROM performance_schema.setup_consumers;
 
--- Verificar instrumentos
+-- Check instruments
 SELECT name, enabled 
 FROM performance_schema.setup_instruments 
 WHERE name LIKE 'statement/%' 
 LIMIT 10;
 ```
 
-### Queries Úteis para Análise
+### Useful Queries for Analysis
 
 ```sql
--- Queries mais lentas agregadas por digest
+-- Slowest queries aggregated by digest
 SELECT 
   DIGEST AS id,
   DIGEST_TEXT AS query,
@@ -197,17 +197,17 @@ WHERE DIGEST_TEXT IS NOT NULL
 ORDER BY SUM_TIMER_WAIT DESC
 LIMIT 100;
 
--- Histórico de queries
+-- Query history
 SELECT * FROM performance_schema.events_statements_history LIMIT 100;
 
--- Queries em execução
+-- Currently executing queries
 SELECT * FROM performance_schema.events_statements_current;
 ```
 
 ---
 
-## Licença
+## License
 
-Este projeto usa os bancos de dados Sakila (LGPL) e Employees (LGPL). See:
+This project uses the Sakila (LGPL) and Employees (LGPL) sample databases. See:
 - [Sakila License](https://dev.mysql.com/doc/sakila/en/sakila-license.html)
 - [Employees Database License](https://github.com/datacharmer/test_db/blob/master/LICENSE)
