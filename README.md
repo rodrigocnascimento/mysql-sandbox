@@ -1,22 +1,26 @@
-# MySQL Sandbox - Example Databases
+# MySQL Sandbox - Historical Data Sharing
 
-Docker Compose configuration for Sakila and Employees (HR) example databases with MySQL 8.0.
+Docker Compose configuration for sharing and accessing historical datasets using MySQL 8.0 containers.
 
 ## About This Project
 
-This project facilitates the setup of two popular MySQL example databases using Docker containers. Ideal for testing, learning, and development.
+This repository facilitates the sharing of historical and legacy datasets through MySQL containers. Ideal for:
+- Testing applications with realistic historical data
+- Learning database concepts with actual legacy schemas
+- Development and experimentation with time-sensitive data
+- Comparing modern applications against historical data patterns
 
-### Available Databases
+### Available Datasets
 
-| Database | Port | Description |
-|----------|------|-------------|
-| **Sakila** | 3306 | Sample database of a video rental store (films, actors, customers, rentals) |
-| **RH Test DB** | 3307 | Employees database (employees, departments, salaries) |
+| Dataset | Port | Description |
+|---------|------|-------------|
+| **Historical Sakila** | 3306 | Legacy video rental store data representing business from 2005-2010 |
+| **Legacy HR Archive** | 3307 | Historical employee records from 2000-2015 with organizational changes |
 
 ### Data Sources
 
-- **Sakila**: [LintangWisesa/Sakila_MySQL_Example](https://github.com/LintangWisesa/Sakila_MySQL_Example)
-- **Employees**: [datacharmer/test_db](http://github.com/datacharmer/test_db)
+- **Historical Sakila**: Adapted from [LintangWisesa/Sakila_MySQL_Example](https://github.com/LintangWisesa/Sakila_MySQL_Example) with historical timeframes
+- **Legacy HR Archive**: Based on [datacharmer/test_db](http://github.com/datacharmer/test_db) representing legacy HR systems
 
 ---
 
@@ -27,11 +31,11 @@ This project facilitates the setup of two popular MySQL example databases using 
 git clone https://github.com/seu-usuario/mysql-sandbox.git
 cd mysql-sandbox
 
-# Start a specific database
+# Start a specific dataset
 make up DB=sakila
 make up DB=rh-testdb
 
-# Start all databases
+# Start all datasets
 make up-all
 
 # Check status
@@ -52,29 +56,31 @@ make status
 
 | Command | Description |
 |---------|-------------|
-| `make up DB=<database>` | Starts a specific database |
-| `make up-all` | Starts all databases |
-| `make down DB=<database>` | Stops a specific database |
-| `make down-all` | Stops all databases |
-| `make restart DB=<database>` | Restarts a specific database |
-| `make logs DB=<database>` | Shows real-time logs |
+| `make up DB=<dataset>` | Starts a specific dataset |
+| `make up-all` | Starts all datasets |
+| `make down DB=<dataset>` | Stops a specific dataset |
+| `make down-all` | Stops all datasets |
+| `make restart DB=<dataset>` | Restarts a specific dataset |
+| `make logs DB=<dataset>` | Shows real-time logs |
 | `make status` | Shows container status |
 | `make clean` | Removes all containers and volumes |
-| `make clean-<database>` | Removes a specific database |
+| `make clean-<dataset>` | Removes a specific dataset |
 
-### Examples
+---
+
+## Examples
 
 ```bash
-# Start Sakila
+# Start Historical Sakila dataset
 make up DB=sakila
 
-# View RH TestDB logs
+# View Legacy HR Archive logs
 make logs DB=rh-testdb
 
-# Stop only Sakila
+# Stop only Historical Sakila
 make down DB=sakila
 
-# Clean only RH TestDB
+# Clean only Legacy HR Archive
 make clean-rh-testdb
 ```
 
@@ -82,76 +88,32 @@ make clean-rh-testdb
 
 ## Connection
 
-### Sakila (port 3306)
+### Historical Sakila (port 3306)
 
 ```bash
 mysql -h localhost -P 3306 -u sakila_user -p sakila
 ```
 
-### RH Test DB (port 3307)
+### Legacy HR Archive (port 3307)
 
 ```bash
 mysql -h localhost -P 3307 -u employees_user -p employees
 ```
 
-### Example Usage with External Test API
+---
 
-The RH Test DB in this repository can be used with external projects like the [rh-sakila-test-api](https://github.com/rodrigocnascimento/rh-sakila-test-api) to test SQL query analysis tools like sql-sage. That API is intentionally designed with many performance errors and anti-patterns for experimental purposes:
-
-```bash
-# Start the RH Test DB from this repository
-make up DB=rh-testdb
-
-# In a separate terminal, clone and set up the test API (separate project)
-git clone https://github.com/rodrigocnascimento/rh-sakila-test-api.git
-cd rh-sakila-test-api
-cp .env.example .env
-npm install
-npm run dev
-```
-
-The API will be available at http://localhost:3000 and provides various endpoints with intentional performance issues (N+1 queries, SELECT *, missing indexes, etc.) to test database analysis tools and understand query performance problems.
-
-**Note**: The rh-sakila-test-api is a separate project and is NOT included in this mysql-sandbox repository. It must be cloned separately to use with this database.
-
-### Environment Variables
-
-Edite o arquivo `.env` para customize as configurações:
-
-```env
-# Sakila
-SAKILA_MYSQL_ROOT_PASSWORD=root_password
-SAKILA_MYSQL_DATABASE=sakila
-SAKILA_MYSQL_USER=sakila_user
-SAKILA_MYSQL_PASSWORD=sakila_password
-
-# RH Test DB
-RH_TESTDB_MYSQL_ROOT_PASSWORD=root_password
-RH_TESTDB_MYSQL_DATABASE=employees
-RH_TESTDB_MYSQL_USER=employees_user
-RH_TESTDB_MYSQL_PASSWORD=employees_password
-
-TZ=America/Sao_Paulo
-```
-
-### RH Test DB (port 3307)
-
-```bash
-mysql -h localhost -P 3307 -u employees_user -p employees
-```
-
-### Environment Variables
+## Environment Variables
 
 Edit the `.env` file to customize configurations:
 
 ```env
-# Sakila
+# Historical Sakila
 SAKILA_MYSQL_ROOT_PASSWORD=root_password
 SAKILA_MYSQL_DATABASE=sakila
 SAKILA_MYSQL_USER=sakila_user
 SAKILA_MYSQL_PASSWORD=sakila_password
 
-# RH Test DB
+# Legacy HR Archive
 RH_TESTDB_MYSQL_ROOT_PASSWORD=root_password
 RH_TESTDB_MYSQL_DATABASE=employees
 RH_TESTDB_MYSQL_USER=employees_user
@@ -169,223 +131,65 @@ mysql-sandbox/
 ├── .env                         # Environment variables
 ├── .gitignore
 ├── Makefile                     # Management commands
-├── docker-compose.sakila.yml   # Compose for Sakila
-├── docker-compose.rh-testdb.yml # Compose for RH TestDB
+├── docker-compose.sakila.yml   # Compose for Historical Sakila
+├── docker-compose.rh-testdb.yml # Compose for Legacy HR Archive
 ├── sakila/
 │   ├── config/
-│   │   └── custom.cnf          # MySQL configuration (Performance Schema)
+│   │   └── custom.cnf          # MySQL configuration
 │   └── init/
-│       ├── sakila-schema.sql  # Sakila database schema
-│       └── sakila-data.sql    # Sakila database data
+│       ├── sakila-schema.sql  # Historical Sakila database schema
+│       └── sakila-data.sql    # Historical Sakila database data
 └── rh-testdb/
     ├── config/
-    │   └── custom.cnf          # MySQL configuration (Performance Schema)
+    │   └── custom.cnf          # MySQL configuration
     └── init/
-        └── employees.sql      # Employees database schema + data
+        └── employees.sql      # Legacy HR Archive schema + data
 ```
 
 ---
 
 ## Features
 
-- **Persistent Volumes**: Data is maintained between restarts
+- **Persistent Volumes**: Historical data is maintained between restarts
 - **Health Checks**: Automatic availability verification
-- **Isolated Networks**: Each database in its own configuration
-- **UTF8MB4 Charset**: Full support for special characters
-- **MySQL 8.0**: Latest stable MySQL version
-- **Performance Schema**: Configured and enabled by default for query analysis
-
-### Why Performance Schema Configuration?
-
-The Performance Schema is configured with specific settings to enable detailed query analysis:
-
-- `performance_schema=ON`: Enables the Performance Schema
-- `performance-schema-instrument=%=ON`: Enables all statement instruments
-- `performance-schema-consumer-events-statements-history=ON`: Stores historical statement events
-- `performance-schema-consumer-events-statements-history-long=ON`: Stores long historical statement events
-- `performance-schema-consumer-events-statements-current=ON`: Stores current statement events
-
-This configuration allows tools like sql-sage to collect and analyze query performance data effectively.
-
-### About the RH Test DB Size
-
-The RH Test DB (Employees database) is intentionally large (~300,000 employees, ~2.8 million salary records) to provide a realistic environment for performance testing. With this volume of data:
-
-- Query performance issues become more pronounced and easier to detect
-- Index usage (or lack thereof) has a significant impact on execution time
-- Tools like sql-sage can demonstrate their value in identifying slow queries
-- Development practices can be tested against production-like data volumes
-
-This makes it ideal for training and experimentation with SQL analysis tools.
-
-### Using with sql-sage and rh-sakila-test-api
-
-This database is designed to work seamlessly with the [sql-sage](https://github.com/rodrigocnascimento/sql-sage) tool and [rh-sakila-test-api](https://github.com/rodrigocnascimento/rh-sakila-test-api) project for comprehensive SQL query analysis training:
-
-#### Option 1: Individual Services (Manual)
-1. **Start the database**: `make up DB=rh-testdb`
-2. **Run the test API**: Clone and run rh-sakila-test-api separately
-3. **Use sql-sage**: Scan the API code, collect queries from Performance Schema, and analyze results
-
-#### Option 2: Docker Compose (Recommended)
-All services can be started together using Docker Compose:
-
-```bash
-# Start all services (database, API, and sql-sage)
-docker-compose up -d
-
-# Or start them individually
-docker-compose up -d rh-testdb     # Just the database
-docker-compose up -d rh-test-api   # Database and API
-docker-compose up -d sql-sage      # All services
-
-# Check status
-docker-compose ps
-
-# View logs
-docker-compose logs -f rh-test-api
-docker-compose logs -f sql-sage
-
-# Stop all services
-docker-compose down
-```
-
-#### Complete Workflow Example with Docker Compose:
-
-```bash
-# Start all services
-docker-compose up -d
-
-# Wait for services to be healthy (check with docker-compose ps)
-
-# Run sql-sage analysis
-# Scan for potential issues in the API code
-sql-sage scan ./rh-sakila-test-api/src --output scanned.jsonl
-
-# Make some requests to generate queries (API is at http://localhost:3000)
-curl http://localhost:3000/api/employees-with-salaries
-curl "http://localhost:3000/api/employees/search?name=john"
-
-# Collect actual queries from the database
-sql-sage collect --source perf-schema \
-  --host rh-testdb \  # Use service name when running in same network
-  --port 3306 \       # Internal port in docker network
-  --user employees_user \
-  --password employees_password \
-  --database employees \
-  --min-time 100 \
-  --output collected.jsonl
-
-# Consolidate and analyze
-sql-sage consolidate --input scanned.jsonl collected.jsonl --output consolidated.jsonl
-sql-sage analyze consolidated.jsonl --model models/
-
-# When finished, clean up
-docker-compose down
-```
-
-#### Manual Workflow Example (Original Method):
-
-```bash
-# Terminal 1: Start the database
-cd mysql-sandbox
-make up DB=rh-testdb
-
-# Terminal 2: Start the test API (in separate directory)
-git clone https://github.com/rodrigocnascimento/rh-sakila-test-api.git
-cd rh-sakila-test-api
-cp .env.example .env
-npm install
-npm run dev
-
-# Terminal 3: Run sql-sage analysis
-# Scan for potential issues in the API code
-sql-sage scan ./rh-sakila-test-api/src --output scanned.jsonl
-
-# Make some requests to generate queries
-curl http://localhost:3000/api/employees-with-salaries
-curl "http://localhost:3000/api/employees/search?name=john"
-
-# Collect actual queries from the database
-sql-sage collect --source perf-schema \
-  --host localhost \
-  --port 3307 \
-  --user employees_user \
-  --password employees_password \
-  --database employees \
-  --min-time 100 \
-  --output collected.jsonl
-
-# Consolidate and analyze
-sql-sage consolidate --input scanned.jsonl collected.jsonl --output consolidated.jsonl
-sql-sage analyze consolidated.jsonl --model models/
-```
-
-This setup provides hands-on experience with:
-- Identifying performance issues in code (static analysis)
-- Capturing actual query performance (dynamic analysis)
-- Comparing predicted vs actual problems
-- Learning optimization techniques
+- **Isolated Networks**: Each dataset in its own configuration
+- **UTF8MB4 Charset**: Full support for special characters and legacy encodings
+- **MySQL 8.0**: Latest stable MySQL version for accessing historical data
+- **Time-zone Configuration**: Properly handles historical timestamps
 
 ---
 
-## Performance Schema
+## Usage Notes
 
-The project comes with [Performance Schema](https://dev.mysql.com/doc/refman/8.0/en/performance-schema.html) automatically configured for query analysis.
+These datasets are intended for:
+- **Data Sharing**: Providing access to historical datasets for collaborative projects
+- **Legacy System Testing**: Testing modern applications against historical data patterns
+- **Educational Purposes**: Learning how data structures and business rules have evolved
+- **Migration Practice**: Practicing data migration from legacy to modern systems
+- **Historical Analysis**: Analyzing business trends over time using consistent datasets
 
-### Enabled Configuration
+The data represents snapshots from specific time periods and can be used to:
+- Test time-based queries and reporting
+- Validate data transformation processes
+- Study evolution of business domains
+- Practice working with legacy data formats
 
-| Parameter | Value |
-|-----------|-------|
-| `performance_schema` | ON |
-| `performance-schema-instrument` | %=ON |
-| `performance-schema-consumer-events-statements-history` | ON |
-| `performance-schema-consumer-events-statements-history-long` | ON |
-| `performance-schema-consumer-events-statements-current` | ON |
+---
 
-### Check Status
+## Maintenance
 
-```sql
--- Check if it's active
-SHOW VARIABLES LIKE 'performance_schema';
-
--- Check active consumers
-SELECT * FROM performance_schema.setup_consumers;
-
--- Check instruments
-SELECT name, enabled 
-FROM performance_schema.setup_instruments 
-WHERE name LIKE 'statement/%' 
-LIMIT 10;
-```
-
-### Useful Queries for Analysis
-
-```sql
--- Slowest queries aggregated by digest
-SELECT 
-  DIGEST AS id,
-  DIGEST_TEXT AS query,
-  ROUND(SUM_TIMER_WAIT / 1000000000, 2) AS executionTimeMs,
-  COUNT_STAR AS executions,
-  SCHEMA_NAME AS `database`
-FROM performance_schema.events_statements_summary_by_digest
-WHERE DIGEST_TEXT IS NOT NULL
-  AND SCHEMA_NAME IS NOT NULL
-ORDER BY SUM_TIMER_WAIT DESC
-LIMIT 100;
-
--- Query history
-SELECT * FROM performance_schema.events_statements_history LIMIT 100;
-
--- Currently executing queries
-SELECT * FROM performance_schema.events_statements_current;
-```
+To update or add new historical datasets:
+1. Place SQL schema and data files in the appropriate `init/` directory
+2. Update the corresponding docker-compose file if needed
+3. Update environment variables in `.env.example`
+4. Document the time period and source of the data in this README
 
 ---
 
 ## License
 
-This project uses the Sakila (LGPL) and Employees (LGPL) sample databases. See:
+This project provides access to adapted historical datasets. See:
 - [Sakila License](https://dev.mysql.com/doc/sakila/en/sakila-license.html)
 - [Employees Database License](https://github.com/datacharmer/test_db/blob/master/LICENSE)
+
+Please ensure compliance with original data licenses when using these datasets.

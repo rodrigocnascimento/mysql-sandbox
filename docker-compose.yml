@@ -48,28 +48,6 @@ services:
     networks:
       - mysql-network
 
-  # SQL Sage - Query Analysis Tool
-  sql-sage:
-    image: node:18
-    container_name: sql-sage
-    restart: unless-stopped
-    working_dir: /app
-    volumes:
-      - ../sql-sage:/app
-    command: >
-      sh -c "
-      npm install &&
-      npm run build &&
-      tail -f /dev/null
-      "
-    ports:
-      - "4000:4000"
-    depends_on:
-      - rh-testdb
-      - rh-test-api
-    networks:
-      - mysql-network
-
 networks:
   mysql-network:
     driver: bridge
